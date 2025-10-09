@@ -1,27 +1,25 @@
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{App, get, web, Responder, HttpResponse, HttpServer};
 
-#[get("/")]
-async fn hello() -> impl Responder {
-    HttpResponse::Ok().body("Hello World!")
+struct AppState{
+    app_name: String,
 }
 
-#[post("/echo")]
-async fn echo(req_body: String) -> impl Responder {
-    HttpResponse::Ok().body(req_body)
-}
-
-async fn manual_hello() -> impl Responder {
-    HttpResponse::Ok().body("Hi there")
+async fn index(data: web::Data<AppState>) -> impl Responder {
+    let app_name = &data.app_name;
+    HttpResponse::Ok().body(format!("Welcome to {app_name}"))
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| {
-        App::new()
-            .service(hello)
-            .service(echo)
-            .route("/hey", web::get().to(manual_hello))
-    })
+    let app_state = web::Data::new(AppState {
+        app_name: String::from("Math Helper"),
+    });
+
+    HttpServer::new(move || {
+                    App::new()
+                    .app_data(app_state.clone())
+                    .route("/", web::get().to(index))
+                    })
     .bind(("127.0.0.1", 8080))?
         .run()
         .await
