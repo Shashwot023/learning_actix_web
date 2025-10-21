@@ -1,9 +1,30 @@
-fn main() {
-    let v1 = vec![1,2,3];
+use std::ops::Deref;
 
-    let v1_iter = v1.iter();
+struct MyBox<T>(T);
 
-    for val in v1_iter {
-        println!("Got: {val}");
+impl<T> MyBox<T> {
+    fn new(x: T) -> MyBox<T> {
+        MyBox(x)
+        }
+}
+
+impl<T> Deref for MyBox<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
+}
+
+impl<T> Drop for MyBox<T> {
+    fn drop(&mut self) {
+        println!("Dropping MyBox containing data!");
+    }
+}
+
+fn main() {
+    let x = 5;
+    let y = MyBox::new(x);
+
+    println!("x = {}, y = {}", x, *y);
 }
