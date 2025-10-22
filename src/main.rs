@@ -1,30 +1,37 @@
 use std::ops::Deref;
 
-struct MyBox<T>(T);
-
-impl<T> MyBox<T> {
-    fn new(x: T) -> MyBox<T> {
-        MyBox(x)
-        }
+#[derive(Debug)]
+struct CustomSmartPointer<T: std::fmt::Display> {
+    data: T,
 }
 
-impl<T> Deref for MyBox<T> {
+impl<T: std::fmt::Display> CustomSmartPointer<T> {
+    fn new(x: T) -> CustomSmartPointer<T> {
+        CustomSmartPointer { data: x }
+    }
+}
+
+impl<T: std::fmt::Display> Deref for CustomSmartPointer<T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
-        &self.0
+        &self.data
     }
 }
 
-impl<T> Drop for MyBox<T> {
+impl<T: std::fmt::Display> Drop for CustomSmartPointer<T> {
     fn drop(&mut self) {
-        println!("Dropping MyBox containing data!");
+        println!("Dropping CSP data: `{}`!", self.data);
     }
+}
+
+fn hello(name: &str) {
+    println!("Hello, {name}!");
 }
 
 fn main() {
-    let x = 5;
-    let y = MyBox::new(x);
-
-    println!("x = {}, y = {}", x, *y);
+    let y = CustomSmartPointer::new(String::from("Visitor"));
+    hello(&y);
+    println!("{y:?}");
 }
+
